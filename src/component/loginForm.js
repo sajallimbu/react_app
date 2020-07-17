@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 
 const initialState = {
   email: "",
@@ -22,13 +23,35 @@ export default class LoginForm extends React.Component {
   };
 
   // submit handler
-  handleSubmit = (event) => {
+  handleSubmit = async (event) => {
     event.preventDefault();
     const isValid = this.validate();
     if (isValid) {
-      console.log(this.state);
-      // reset the form
-      this.setState(initialState);
+      const url = "http://localhost:8080/login";
+      let userEmail = this.state.email;
+      let userPassword = this.state.password;
+      const requestBody = {
+        email: userEmail,
+        password: userPassword,
+      };
+      const options = {
+        headers: { "Content-Type": "application/json" },
+      };
+      // FYI your login POST request in backend should allow OPTIONS in it's methods
+      // cause we send two request here one is our request body and the second is options
+      // i.e. two requests are send in sequence
+      await axios
+        .post(url, JSON.stringify(requestBody), options)
+        .then((response) => {
+          if (response.status === 200) {
+            alert("Logged in successfully");
+            // reset the form
+            this.setState(initialState);
+          }
+        })
+        .catch((error) => {
+          console.log(error.stringify);
+        });
     }
   };
 
